@@ -1,0 +1,21 @@
+# .bashrc.d/alias
+
+alias ~="cd ~/"
+
+alias ..="cd ../"
+
+alias ...="cd ../../"
+
+alias ....="cd ../../../"
+
+alias c="clear"
+
+alias l="ls -la -h --group-directories-first"
+
+alias q="exit"
+
+alias compose="docker compose"
+
+alias compose_reset="docker compose down && docker compose up -d"
+
+alias vi="nvim"
