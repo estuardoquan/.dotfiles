@@ -1,0 +1,140 @@
+@import './colors.css';
+* {
+	border: none;
+	border-radius: 0;
+	font-family: 'Noto Sans', 'Font Awesome 6 Brands', sans-serif;
+	font-size: 13px;
+	min-height: 0;
+}
+
+window#waybar {
+	/* background: rgba(100, 114, 125, 0); */
+	/* border-bottom: 3px solid rgba(100, 114, 125, 0.5); */
+	background-color: transparent;
+	color: rgba(255, 255, 255, 1);
+}
+
+tooltip {
+	background: rgba(43, 48, 59, 0.75);
+	border: 1px solid rgba(100, 114, 125, 0.75);
+}
+tooltip label {
+	color: white;
+}
+
+#workspaces {
+	border-radius: 6px;
+	border: 1px rgba(255, 255, 255, 0.3) solid;
+	margin-top: 8px;
+	background-color: @background;
+}
+
+#workspaces * {
+	font-size: 20px;
+}
+
+#workspaces button {
+	border-radius: 4px;
+	background: transparent;
+	color: #ffffff;
+	padding: 2px 10px 2px 6px;
+	margin: 4px;
+}
+
+#workspaces button:nth-child(n + 2) {
+	margin-left: 0px;
+}
+
+#workspaces button:not(.active) {
+	background-color: rgba(100, 100, 100, 0.1);
+	color: rgba(255, 255, 255, 0.3);
+}
+
+#workspaces button.active {
+	background-color: rgba(55, 55, 55, 0.6);
+	color: rgba(255, 255, 255, 1);
+	padding: 2px 10px 2px 6px;
+}
+
+#workspaces button.empty {
+	border: unset;
+	background-color: rgba(255, 255, 255, 0);
+	color: rgb(218, 30, 30);
+	padding: 0px 6px 0px 3px;
+}
+
+#workspaces button:hover {
+	box-shadow: none;
+	text-shadow: none;
+}
+
+#workspaces button:not(.active):hover {
+	background-color: rgba(255, 255, 255, 0.1);
+	color: rgba(255, 255, 255, 1);
+}
+
+#workspaces button.active:hover {
+	border: none;
+	animation: none;
+}
+
+#window {
+	border-radius: 20px;
+	margin: 8px 4px 0px 8px;
+}
+
+/* make window module transparent when no windows present */
+window#waybar.empty #window {
+	background-color: transparent;
+}
+
+#battery,
+#cpu,
+#clock,
+#pulseaudio {
+	/* background-color: @background; */
+	color: #ffffff;
+	padding: 2px 8px;
+	/* border-top: 1px rgba(255, 255, 255, 0.3) solid; */
+	/* border-bottom: 1px rgba(255, 255, 255, 0.3) solid; */
+}
+
+#clock {
+	/* border-radius: 0px 6px 6px 0px; */
+	/* border-right: 1px rgba(255, 255, 255, 0.3) solid; */
+	margin: 8px 8px 0px 0px;
+}
+
+#cpu {
+	/* border-radius: 6px 0px 0px 6px; */
+	/* border-left: 1px rgba(255, 255, 255, 0.3) solid; */
+}
+
+#battery,
+#cpu,
+#pulseaudio {
+	margin: 8px 0px 0px 0px;
+	padding: 2px 8px;
+}
+
+#battery.charging {
+	color: #26a65b;
+	/* background-color: ; */
+}
+
+@keyframes blink {
+	to {
+		background-color: #ffffff;
+		color: black;
+	}
+}
+
+#battery.warning:not(.charging) {
+	background: #f53c3c;
+	color: white;
+	animation-name: blink;
+	animation-duration: 0.5s;
+	animation-timing-function: steps(12);
+	animation-iteration-count: infinite;
+	animation-direction: alternate;
+}
