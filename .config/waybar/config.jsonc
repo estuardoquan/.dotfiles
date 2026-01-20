@@ -30,17 +30,30 @@
 		"format-icons": {
 			"active": "",
 			"default": "",
-			"empty": ""
+			"empty": "",
+			"special": ""
 		},
-		"format-window-separator": " ",
-		"window-rewrite-default": "",
-		"window-rewrite": {
-			"title<.*youtube.*>": "󰗃",
-			"title<.*github.*>": "",
-			"chromium": "",
-			"class<kitty>": "",
-			"class<code>": ""
+		"format-window-separator": "",
+		"show-special": true,
+		"workspace-taskbar": {
+			"enable": true,
+			"update-active-window": true,
+			"format": "{icon}",
+			"icon-size": 18
+			// "on-click-window": "${SCRIPTS}/focus-window.sh {address} {button}"
 		}
+		// "window-rewrite-default": "",
+		// "window-rewrite": {
+		// 	"title<.*facebook.*>": "",
+		// 	"title<.*instagram.*>": "󰋾",
+		// 	"title<.*reddit.*>": "",
+		// 	"title<.*youtube.*>": "󰗃",
+		// 	"title<.*github.*>": "",
+		// 	"title<.*google.*>": "",
+		// 	"chromium": "",
+		// 	"class<kitty>": "",
+		// 	"class<code>": ""
+		// }
 	},
 	"hyprland/window": {
 		"format": "{title}",
