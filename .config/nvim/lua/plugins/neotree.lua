@@ -24,6 +24,6 @@ return {
                 },
             })
 
-        vim.keymap.set('n', '<C-n>', ':Neotree toggle left<CR>', {})
+        vim.keymap.set('n', '<C-n>', ':Neotree toggle right<CR>', {})
     end
 }
