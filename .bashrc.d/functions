@@ -1,1 +1,7 @@
 #!/bin/sh
+
+function ssh_kitty () {
+    if [[ "${TERM}" == "xterm-kitty" ]]; then
+        kitty +kitten ssh ${@}
+    fi
+}
