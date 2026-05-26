@@ -1,5 +1,4 @@
 # Colored Prompt
-export PS1="\e[2m\][\[\e[m\]\[\e[38;5;197m\]\u\[\e[m\]\[\e[38;5;226m\]@\[\e[m\]\h\\[\e[38;5;226m\]:\[\e[m\]\W\[\e[2m\]]\[\e[m\] \$ "
-
+export PS1="\[\e[2m\][\[\e[m\]\[\e[38;5;197m\]\u\[\e[m\]\[\e[38;5;226m\]@\[\e[m\]\h\[\e[38;5;226m\]:\[\e[m\]\W\[\e[2m\]]\[\e[m\] $ "
 # List sorting dot files first
 export LC_COLLATE="C"
