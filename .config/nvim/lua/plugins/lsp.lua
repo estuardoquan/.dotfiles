@@ -40,7 +40,7 @@ return {
                 vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
 
                 -- Document highlight (optional)
-                if client.supports_method("textDocument/documentHighlight") then
+                if client:supports_method("textDocument/documentHighlight") then
                     vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
                         buffer = bufnr,
                         callback = vim.lsp.buf.document_highlight,
