@@ -25,3 +25,6 @@ alias vi="nvim"
 alias tf_apply="terraform apply -auto-approve"
 
 alias tf_destroy="terraform apply -auto-approve -destroy"
+
+alias docker_psf="docker ps -a --format 'table {{.ID}}\t{{.Names}}\t{{.Status}}'"
+
