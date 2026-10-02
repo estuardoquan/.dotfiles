@@ -27,3 +27,139 @@ function get_os() {
             ;;
     esac
 }
+
+function calc() {
+    local opts exp res
+
+    if ! opts=$(getopt --options eh --longoptions help -- "$@"); then
+        return 1;
+    fi
+
+    eval set -- "$opts"
+
+    exp=0
+
+    while true; do
+        case "$1" in
+        -e)
+            exp=1
+            shift
+            ;;
+        -h|--help)
+            echo HELP!
+            return 0
+            ;;
+        --)
+            shift
+            break;;
+        esac
+    done
+
+    if (( $# > 1 )); then
+        return 1
+    fi
+    
+    res=$(echo "$1" | BC_LINE_LENGTH=0 bc -l)
+    
+    if [ -z "$res" ] ; then
+        return 1;
+    fi
+
+    if (( exp == 1 )); then
+        printf "%e\n" "$res"
+        
+        return 0
+    fi
+
+    echo "$res"
+    
+    return 0
+}
+
+function nas() {
+    local o p q
+    
+    p=i:v:cdhr
+    q=id:url:,volume:,connect,delete,help,reload
+
+    if ! o=$(getopt --options $p --longoptions $q -- "$@"); then
+        return 1;
+    fi
+
+    eval set -- "$o"
+
+    local del con rel run
+    
+    del=2#10
+    con=2#01
+    run=0
+
+    local id url vol
+    
+    id=0
+
+    while true; do
+        case "$1" in
+        -i|--id)
+            id=$2
+            shift 2 
+            ;;
+        -v|--volume)
+            vol=$2
+            shift 2 
+            ;;
+        --url)
+            url=$2
+            shift 2 
+            ;;
+        -c|--connect)
+            (( run |= con ))
+            shift 
+            ;;
+        -d|--delete)
+            (( run |= del ))
+            shift
+            ;;
+        -r|--reset)
+            (( run |= con | del ))
+            shift
+            ;;
+        -h|--help)
+            echo HELP!
+            return 0
+            ;;
+        --)
+            shift
+            break;;
+        esac
+    done
+
+    local srv=${url:-"nas-$id"}
+    
+    if ! (( run & (con | del) )); then
+        showmount -e $srv
+    fi
+ 
+    vol=${vol:-"/home/${USER}/nas/"}
+    vol+=$srv
+
+    for i in "$@"; do
+        echo here
+        local dest=$vol/$i
+
+        if (( run & del )); then
+            printf "Unmounting %s:/mnt/%s from %s\n" $srv $i $dest
+            umount -l $vol
+        fi
+
+        if (( run & con )); then
+            printf "Mounting %s:/mnt/%s to %s\n" $srv $i $dest
+            mkdir -p $dest
+
+            mount -t nfs $server:/mnt/$mnt $dest
+        fi
+
+    done
+    unset i
+    
+}
