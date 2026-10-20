@@ -68,9 +68,10 @@ fi
 
 TARGET="common $TARGET"
 
+mkdir -p $HOME/.config
 
 for t in $TARGET; do
-	set -- -t /home/$USER
+	set -- -t $HOME
 	
 	if [ -d $t ]; then
 		set -- $@ -d $t
