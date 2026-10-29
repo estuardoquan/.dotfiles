@@ -1,6 +1,33 @@
+-- vim.lsp.config / vim.lsp.enable exist from Neovim 0.11.
+-- mason v2, mason-lspconfig v2 and nvim-lspconfig v2 require Neovim 0.11.
+local has_011 = vim.fn.has("nvim-0.11") == 1
+
+-- musl (Alpine): Mason has no musl build for lua_ls and clangd.
+-- Those come from the system instead: apk add lua-language-server clang-extra-tools
+local is_musl = vim.fn.glob("/lib/ld-musl-*.so.1") ~= ""
+
+local function mason_servers()
+    local servers = { "terraformls" }
+
+    if not is_musl then
+        vim.list_extend(servers, { "lua_ls", "clangd" })
+    end
+
+    if vim.fn.executable("npm") == 1 then
+        vim.list_extend(servers, { "pyright", "ts_ls", "bashls" })
+    end
+
+    if vim.fn.executable("php") == 1 then
+        table.insert(servers, "phpactor")
+    end
+
+    return servers
+end
+
 return {
     {
         "williamboman/mason.nvim",
+        tag = not has_011 and "v1.11.0" or nil,
         build = ":MasonUpdate",
         priority = 1000,
         config = function()
@@ -11,25 +38,19 @@ return {
     },
     {
         "williamboman/mason-lspconfig.nvim",
+        tag = not has_011 and "v1.32.0" or nil,
         dependencies = { "williamboman/mason.nvim" },
         config = function()
             require("mason-lspconfig").setup({
-                ensure_installed = {
-                    "lua_ls",         -- Lua 
-                    "pyright",        -- Python
-                    "phpactor",       -- PHP (free alternative)
-                    "ts_ls",          -- JavaScript/TypeScript
-                    "clangd",         -- C / C++
-                    "bashls",         -- Bash / sh
-                    "terraformls",    -- Terraform (covers HCL; closest for Packer)
-                },
-                automatic_installation = true,
+                ensure_installed = mason_servers(),
+                automatic_enable = false,
             })
         end,
     },
     {
         "neovim/nvim-lspconfig",
-        dependencies = { "hrsh7th/cmp-nvim-lsp" },
+        tag = not has_011 and "v1.8.0" or nil,
+        dependencies = { "williamboman/mason-lspconfig.nvim", "hrsh7th/cmp-nvim-lsp" },
         config = function()
             local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
@@ -39,8 +60,16 @@ return {
                 vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, opts)
                 vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
 
+                local method = "textDocument/documentHighlight"
+                local supported
+                if has_011 then
+                    supported = client:supports_method(method)
+                else
+                    supported = client.supports_method(method)
+                end
+
                 -- Document highlight (optional)
-                if client:supports_method("textDocument/documentHighlight") then
+                if supported then
                     vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
                         buffer = bufnr,
                         callback = vim.lsp.buf.document_highlight,
@@ -52,76 +81,63 @@ return {
                 end
             end
 
-            -- Lua
-            vim.lsp.config("lua_ls", {
-                capabilities = capabilities,
-                on_attach = on_attach,
-                settings = {
-                    Lua = {
-                        diagnostics = { globals = { "vim" } },
-                        runtime = { version = "LuaJIT" },
-                        workspace = { checkThirdParty = false },
-                        telemetry = { enable = false },
-                    },
-                },
-            })
-
-            -- Python (pyright)
-            vim.lsp.config("pyright", {
-                capabilities = capabilities,
-                on_attach = on_attach,
-                settings = {
-                    python = {
-                        analysis = {
-                            autoSearchPaths = true,
-                            useLibraryCodeForTypes = true,
-                            diagnosticMode = "workspace",
+            local servers = {
+                -- Lua
+                lua_ls = {
+                    settings = {
+                        Lua = {
+                            diagnostics = { globals = { "vim" } },
+                            runtime = { version = "LuaJIT" },
+                            workspace = { checkThirdParty = false },
+                            telemetry = { enable = false },
                         },
                     },
                 },
-            })
 
-            -- PHP (phpactor)
-            vim.lsp.config("phpactor", {
-                capabilities = capabilities,
-                on_attach = on_attach,
-            })
+                -- Python (pyright)
+                pyright = {
+                    settings = {
+                        python = {
+                            analysis = {
+                                autoSearchPaths = true,
+                                useLibraryCodeForTypes = true,
+                                diagnosticMode = "workspace",
+                            },
+                        },
+                    },
+                },
 
-            -- JavaScript / TS
-            vim.lsp.config("ts_ls", {
-                capabilities = capabilities,
-                on_attach = on_attach,
-            })
+                -- PHP (phpactor)
+                phpactor = {},
 
-            -- C / C++
-            vim.lsp.config("clangd", {
-                capabilities = capabilities,
-                on_attach = on_attach,
-                cmd = { "clangd", "--background-index", "--clang-tidy" },
-            })
+                -- JavaScript / TS
+                ts_ls = {},
 
-            -- Bash
-            vim.lsp.config("bashls", {
-                capabilities = capabilities,
-                on_attach = on_attach,
-            })
+                -- C / C++
+                clangd = {
+                    cmd = { "clangd", "--background-index", "--clang-tidy" },
+                },
 
-            -- Terraform (and HCL / Packer approximation)
-            vim.lsp.config("terraformls", {
-                capabilities = capabilities,
-                on_attach = on_attach,
-            })
+                -- Bash
+                bashls = {},
 
-            -- Enable
-            vim.lsp.enable({
-                "lua_ls",
-                "pyright",
-                "phpactor",
-                "ts_ls",
-                "clangd",
-                "bashls",
-                "terraformls",
-            })
+                -- Terraform (and HCL / Packer approximation)
+                terraformls = {},
+            }
+
+            for name, opts in pairs(servers) do
+                opts = vim.tbl_extend("force", {
+                    capabilities = capabilities,
+                    on_attach = on_attach,
+                }, opts)
+
+                if has_011 then
+                    vim.lsp.config(name, opts)
+                    vim.lsp.enable(name)
+                else
+                    require("lspconfig")[name].setup(opts)
+                end
+            end
         end,
     },
 }
